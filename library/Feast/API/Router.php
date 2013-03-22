@@ -278,4 +278,21 @@ class Feast_API_Router {
 		$error = compact( 'code', 'message' );
 		return json_encode(array($error));
 	}
+
+	/**
+	 * Retrieve the raw request entity (body)
+	 *
+	 * @return string
+	 */
+	protected function get_raw_data() {
+		global $HTTP_RAW_POST_DATA;
+
+		// A bug in PHP < 5.2.2 makes $HTTP_RAW_POST_DATA not set by default,
+		// but we can do it ourself.
+		if ( !isset( $HTTP_RAW_POST_DATA ) ) {
+			$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+		}
+
+		return $HTTP_RAW_POST_DATA;
+	}
 }
