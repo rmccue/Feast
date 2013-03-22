@@ -337,7 +337,7 @@ class Feast extends Feast_Autohooker {
 
 		$base = parse_url( site_url( '/feast/api' ), PHP_URL_PATH );
 
-		$path = str_replace($base, '', $_SERVER['REQUEST_URI']);
+		$path = parse_url( str_replace($base, '', $_SERVER['REQUEST_URI']), PHP_URL_PATH );
 
 		Feast_API::route( $path );
 	}
