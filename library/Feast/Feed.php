@@ -17,13 +17,38 @@ class Feast_Feed extends Feast_Post {
 		if (is_wp_error($this->sp))
 			return false;
 
+		// Setup the timezone object
+		$this->timezone = Feast::getTimezoneObject();
+
+		add_filter('feast_pre_insert_item', array(&$this, 'localiseTime'), 10, 3);
+
 		foreach ($this->sp->get_items() as $item) {
 			Feast_Item::create($item, $this);
 		}
 
+		remove_filter('feast_pre_insert_item', array(&$this, 'localiseTime'), 10, 3);
+
 		update_post_meta($this->ID, '_feast_last_updated', time());
 
 		return true;
+	}
+
+	public function localiseTime($data, $item, $feed) {
+		$publish = $item->get_date('U');
+		if ( $publish ) {
+			$publish = new DateTime( '@' . $publish );
+			$publish->setTimezone( $this->timezone );
+			$data['post_date'] = $publish->format('Y-m-d H:i:s');
+		}
+
+		$updated = $item->get_updated_date('U');
+		if ($updated) {
+			$updated = new DateTime( '@' . $updated );
+			$updated->setTimezone( $this->timezone );
+			$data['post_modified'] = $updated->format('Y-m-d H:i:s');
+		}
+
+		return $data;
 	}
 
 	public function get_items($args = array()) {
