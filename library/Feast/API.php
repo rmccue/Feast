@@ -42,11 +42,16 @@ class Feast_API extends Feast_Autohooker {
 
 			'/feeds/(?P<feed>\d+)/items/(?P<id>\d+)' => array(
 				array( 'Feast_API::getItem', Feast_API_Router::READABLE ),
+				array( 'Feast_API::editItem',   Feast_API_Router::EDITABLE | Feast_API_Router::ACCEPT_JSON ),
 			),
 
 			// Item endpoints
-			'/items'             => array(
+			'/items' => array(
 				array( 'Feast_API::getItems', Feast_API_Router::READABLE ),
+			),
+
+			'/items/read' => array(
+				array( 'Feast_API::markAllRead', Feast_API_Router::METHOD_POST ),
 			),
 
 			'/items/(?P<id>\d+)' => array(
@@ -69,6 +74,8 @@ class Feast_API extends Feast_Autohooker {
 
 	/**
 	 * Route an API call to the correct handler
+	 *
+	 * @param string $path URL path to route
 	 */
 	public static function route( $path ) {
 		header('Content-Type: application/json; charset=utf-8');
@@ -80,21 +87,57 @@ class Feast_API extends Feast_Autohooker {
 		die();
 	}
 
-	public static function getItem( $ID ) {
-		$post = get_post($ID);
+	public static function getItem( $id ) {
+		$post = get_post($id);
 
 		$item = self::getItemData($post);
 
 		return $item;
 	}
 
-	public static function getItems( $limit = 20, $start = 0, $page = 1, $feed = 0 ) {
+	public static function editItem( $id, $read = true ) {
+		self::markItemRead( $id, $read );
+		return self::getItem( $id );
+	}
+
+	public static function markItemRead( $id, $read = true ) {
+		$user = get_current_user_id();
+		if ( ! $user ) {
+			return new WP_Error( 'feast_json_unauthenticated', __( 'This endpoint requires authentication', 'feast' ), array( 'status' => 401 ) );
+		}
+
+		if ( $read ) {
+			add_post_meta( $id, '_feast_read_by_' . $user, true, true );
+		}
+		else {
+			delete_post_meta( $id, '_feast_read_by_' . $user );
+		}
+	}
+
+	public static function getItems( $limit = 20, $start = 0, $page = 1, $feed = 0, $unread = null ) {
+		$user = get_current_user_id();
 		$args = array(
 			'post_type' => Feast_Item::TYPE,
 			'posts_per_page' => $limit,
 			'offset' => $start,
 			'paged' => $page,
+			'meta_query' => array(),
 		);
+		if ( $unread !== null ) {
+			if ( ! $user ) {
+				return new WP_Error( 'feast_json_unauthenticated', __( 'This endpoint requires authentication', 'feast' ), array( 'status' => 401 ) );
+			}
+
+			$condition = 'NOT EXISTS';
+			if ( ! $unread )
+				$condition = 'EXISTS';
+
+			$args['meta_query'][] = array(
+				'key' => '_feast_read_by_' . $user,
+				'value' => true,
+				'compare' => $condition,
+			);
+		}
 
 		if ( $feed > 0 ) {
 			$args['post_parent'] = absint($feed);
@@ -109,11 +152,25 @@ class Feast_API extends Feast_Autohooker {
 		return $items;
 	}
 
+	public static function markAllRead() {
+		$user = get_current_user_id();
+
+		// Get unread items
+		$unread = self::getItems(-1, 0, 1, 0, true);
+		$IDs = array_keys( $unread );
+
+		foreach ($IDs as $ID) {
+			add_post_meta( $ID, '_feast_read_by_' . $user, true, true);
+		}
+
+		return true;
+	}
+
 	public static function getItemData($post) {
-		return array(
+		$data = array(
 			'id' => $post->ID,
 			'title' => $post->post_title,
-			'timestamp' => strtotime($post->post_date),
+			'timestamp' => strtotime($post->post_date_gmt),
 			'feed_id' => (string) $post->post_parent,
 			'permalink' => get_permalink( $post->ID ),
 			'content' => $post->post_content,
@@ -122,6 +179,11 @@ class Feast_API extends Feast_Autohooker {
 				'url' => get_post_meta( $post->ID, '_feast_author_url', true ),
 			),
 		);
+		if ($user = get_current_user_id()) {
+			$data['read'] = (bool) get_post_meta( $post->ID, '_feast_read_by_' . $user, true);
+		}
+
+		return $data;
 	}
 
 	public static function getFeeds( $limit = 40, $conditions = array() ) {
