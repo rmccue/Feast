@@ -65,7 +65,7 @@ class Feast_API extends Feast_Autohooker {
 			),
 		);
 
-		$endpoints = apply_filters( 'feast_json_endpoints', $endpoints );
+		$endpoints = apply_filters( 'feast_api_endpoints', $endpoints );
 
 		// Normalise the endpoints
 		foreach ( $endpoints as $route => &$handlers ) {
@@ -107,7 +107,7 @@ class Feast_API extends Feast_Autohooker {
 	public static function markItemRead( $id, $read = true ) {
 		$user = get_current_user_id();
 		if ( ! $user ) {
-			return new WP_Error( 'feast_json_unauthenticated', __( 'This endpoint requires authentication', 'feast' ), array( 'status' => 401 ) );
+			return new WP_Error( 'feast_api_unauthenticated', __( 'This endpoint requires authentication', 'feast' ), array( 'status' => 401 ) );
 		}
 
 		if ( $read ) {
@@ -129,7 +129,7 @@ class Feast_API extends Feast_Autohooker {
 		);
 		if ( $unread !== null ) {
 			if ( ! $user ) {
-				return new WP_Error( 'feast_json_unauthenticated', __( 'This endpoint requires authentication', 'feast' ), array( 'status' => 401 ) );
+				return new WP_Error( 'feast_api_unauthenticated', __( 'This endpoint requires authentication', 'feast' ), array( 'status' => 401 ) );
 			}
 
 			$condition = 'NOT EXISTS';

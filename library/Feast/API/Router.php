@@ -47,8 +47,8 @@ class Feast_API_Router {
 	public function serve_request( $path ) {
 		header('Content-Type: application/json; charset=' . get_option('blog_charset'), true);
 
-		$enabled = apply_filters( 'feast_json_enabled', true );
-		$jsonp_enabled = apply_filters( 'feast_json_jsonp_enabled', true );
+		$enabled = apply_filters( 'feast_api_enabled', true );
+		$jsonp_enabled = apply_filters( 'feast_api_jsonp_enabled', true );
 
 		if ( ! $enabled ) {
 			echo $this->json_error( 'json_disabled', 'The JSON API is disabled on this site.', 405 );
