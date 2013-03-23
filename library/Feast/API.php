@@ -5,6 +5,10 @@ class Feast_API extends Feast_Autohooker {
 		parent::register_hooks();
 	}
 
+	public static function getURL($path = '') {
+		return site_url('/feast/api' . $path);
+	}
+
 	/**
 	 * Retrieve the route map
 	 *
