@@ -3,7 +3,15 @@
 class Feast_Feed extends Feast_Post {
 	const TYPE = 'feast-feed';
 
-	protected $sp = null;
+	/**
+	 * Cached SimplePie object
+	 *
+	 * This can be set if updating from a different feed (e.g. PuSH partial
+	 * updates), but otherwise should be set internally
+	 *
+	 * @var SimplePie
+	 */
+	public $sp = null;
 
 	/**
 	 * Update a feed from its source
