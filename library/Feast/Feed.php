@@ -238,4 +238,13 @@ class Feast_Feed extends Feast_Post {
 	public static function getDefaultIcon() {
 		return 0;
 	}
+
+	public static function get($ID) {
+		$post = get_post($ID);
+		if (is_wp_error($post)) {
+			return $post;
+		}
+
+		return new Feast_Feed($post);
+	}
 }
