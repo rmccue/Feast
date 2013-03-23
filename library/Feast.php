@@ -12,11 +12,11 @@ class Feast extends Feast_Autohooker {
 		parent::register_hooks();
 
 		// Default feed hooks
-		add_action('feast_pre_insert_feed', array('Feast_Feed', 'prepareFeedData'), 10, 2);
-		add_action('feast_create_feed', array('Feast_Feed', 'addFeedData'), 10, 2);
+		add_action('feast_pre_insert_feed', array('Feast_Feed', 'prepareFeedData'), 100, 2);
+		add_action('feast_create_feed', array('Feast_Feed', 'addFeedData'), 100, 2);
 
 		// Default item hooks
-		add_action('feast_create_item', array('Feast_Item', 'addItemData'), 10, 3);
+		add_action('feast_create_item', array('Feast_Item', 'addItemData'), 100, 3);
 
 		if (is_admin()) {
 			Feast_Admin::bootstrap();
