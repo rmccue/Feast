@@ -177,6 +177,7 @@ class Feast_API extends Feast_Autohooker {
 			'timestamp' => strtotime($post->post_date_gmt),
 			'feed_id' => (string) $post->post_parent,
 			'permalink' => get_permalink( $post->ID ),
+			'original' => get_post_meta( $post->ID, '_feast_item_link', true ),
 			'content' => $post->post_content,
 			'author' => array(
 				'name' => get_post_meta( $post->ID, '_feast_author_name', true ),

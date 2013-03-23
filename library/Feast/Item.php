@@ -62,6 +62,7 @@ class Feast_Item extends Feast_Post {
 	 */
 	public static function addItemData($id, $sp_item, $feed) {
 		add_post_meta( $id, '_feast_item_id', $sp_item->get_id() );
+		add_post_meta( $id, '_feast_item_link', $sp_item->get_permalink() );
 
 		$author = $sp_item->get_author();
 
