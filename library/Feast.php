@@ -153,6 +153,7 @@ class Feast extends Feast_Autohooker {
 				Feast::$feed = new Feast_Feed($post);
 				break;
 			case Feast_Item::TYPE:
+				Feast::$feed = new Feast_Feed(get_post($post->post_parent));
 				Feast::$item = new Feast_Item($post);
 				break;
 		}
