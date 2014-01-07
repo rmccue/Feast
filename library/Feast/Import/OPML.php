@@ -227,7 +227,7 @@ class Feast_Import_OPML extends WP_Importer {
 	 * Added to http_request_timeout filter to force timeout at 60 seconds during import
 	 * @return int 60
 	 */
-	public function bump_request_timeout() {
+	public function bump_request_timeout($val) {
 		return 60;
 	}
 }
