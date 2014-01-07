@@ -101,6 +101,25 @@ class Feast extends Feast_Autohooker {
 	}
 
 	/**
+	 * Add Feast items to the homepage
+	 *
+	 * @wp-filter pre_get_posts
+	 */
+	public static function display_on_home( $query ) {
+		if ( ! $query->is_home() || ! get_option( 'feast_display_on_home', false ) )
+			return;
+
+		$types = $query->get('post_type');
+		if ( empty( $types ) )
+			$types = 'post';
+
+		$types = (array) $types;
+		$types[] = Feast_Item::TYPE;
+
+		$query->set('post_type', $types);
+	}
+
+	/**
 	 * Add Feast post rewrite rules
 	 *
 	 * @wp-action init
